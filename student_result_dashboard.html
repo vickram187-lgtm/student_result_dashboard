@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Result Dashboard</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            margin: 0;
+            padding: 24px;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(0,0,0,.08);
+        }
+        h1 { text-align: center; color: #1d3557; margin-top: 0; }
+        .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        input, button {
+            padding: 11px 13px;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        input { flex: 1; min-width: 220px; border: 1px solid #cbd5e1; }
+        button { border: 0; background: #2563eb; color: #fff; cursor: pointer; }
+        button:hover { background: #1d4ed8; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th, td { border: 1px solid #dbe2ea; padding: 11px; text-align: center; white-space: nowrap; }
+        th { background: #1d3557; color: #fff; }
+        tbody tr:nth-child(even) { background: #f8fafc; }
+        .pass { color: #15803d; font-weight: bold; }
+        .fail { color: #dc2626; font-weight: bold; }
+        .note { color: #64748b; font-size: 13px; margin-top: 12px; }
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .container { padding: 16px; }
+            h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Interactive Student Result Dashboard</h1>
+        <div class="controls">
+            <input type="text" id="search" placeholder="Search by name or roll number" aria-label="Search students">
+            <button type="button" onclick="searchStudent()">Search</button>
+            <button type="button" onclick="displayStudents()">Show All</button>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll No.</th>
+                        <th>Name</th>
+                        <th>Marks</th>
+                        <th>Total</th>
+                        <th>Average</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTable"></tbody>
+            </table>
+        </div>
+        <p class="note">Pass rule: a student must score at least 35 marks in every subject.</p>
+    </main>
+
+    <script>
+        // Array of student objects. Each student stores marks in an array.
+        const students = [
+            { rollNo: "101", name: "Arun", marks: [85, 90, 78] },
+            { rollNo: "102", name: "Priya", marks: [92, 88, 95] },
+            { rollNo: "103", name: "Kumar", marks: [35, 28, 40] },
+            { rollNo: "104", name: "Divya", marks: [75, 80, 82] }
+        ];
+
+        // Display the selected student records dynamically.
+        function displayStudents(data = students) {
+            const table = document.getElementById("resultTable");
+            table.replaceChildren();
+
+            if (data.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 6;
+                cell.textContent = "No student found";
+                row.appendChild(cell);
+                table.appendChild(row);
+                return;
+            }
+
+            data.forEach(student => {
+                const total = student.marks.reduce((sum, mark) => sum + mark, 0);
+                const average = (total / student.marks.length).toFixed(2);
+                const result = student.marks.every(mark => mark >= 35) ? "PASS" : "FAIL";
+
+                const row = document.createElement("tr");
+                const values = [
+                    student.rollNo,
+                    student.name,
+                    student.marks.join(", "),
+                    total,
+                    average,
+                    result
+                ];
+
+                values.forEach((value, index) => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    if (index === 5) cell.className = result === "PASS" ? "pass" : "fail";
+                    row.appendChild(cell);
+                });
+                table.appendChild(row);
+            });
+        }
+
+        // Search by student name or roll number (case-insensitive).
+        function searchStudent() {
+            const query = document.getElementById("search").value.trim().toLowerCase();
+            const filtered = students.filter(student =>
+                student.name.toLowerCase().includes(query) ||
+                student.rollNo.toLowerCase().includes(query)
+            );
+            displayStudents(filtered);
+        }
+
+        // Pressing Enter in the search field also searches.
+        document.getElementById("search").addEventListener("keydown", event => {
+            if (event.key === "Enter") searchStudent();
+        });
+
+        displayStudents();
+    </script>
+</body>
+</html>
